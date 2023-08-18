@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.querySelector('#compose-form').addEventListener('submit', send_email);
 
+
+
   // By default, load the inbox
   load_mailbox('inbox');
 });
@@ -32,6 +34,19 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  fetch(`/emails/${mailbox}`)
+  .then(response => response.json())
+  .then(emails => {
+      emails.forEach(email => {
+        const element = document.createElement('div');
+        element.innerHTML = `Subject: ${email.subject} <br> From: ${email.sender} <br> Message: ${email.timestamp} <hr>`;
+        element.addEventListener('click', function() {
+            console.log('This element has been clicked!')
+        });
+        document.querySelector('#emails-view').append(element);
+      })
+  });
 }
 
 function send_email(event) {
@@ -51,12 +66,7 @@ function send_email(event) {
   .then(response => response.json())
   .then(result => {
     console.log(result)
-    load_mailbox("sent")
+    load_mailbox('sent')
   })
   .catch((error) => console.log(error));
-  return false;
-}
-
-function mailbox() {
-  
 }
