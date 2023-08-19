@@ -44,6 +44,12 @@ function load_mailbox(mailbox) {
         const element = document.createElement('div');
         element.innerHTML = `Subject: ${email.subject} <br> From: ${email.sender} <br> Message: ${email.timestamp} <hr>`;
         element.addEventListener('click', function() {
+            // fix the color 
+            if (email.read == true) {
+              element.style.backroundColor = "lightgray";
+            } else {
+              element.style.backroundColor = "black";
+            }
             console.log('This element has been clicked!')
             each_email(email.id)
         });
