@@ -19,6 +19,7 @@ function compose_email() {
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#one-email-view').style.display = 'none';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
@@ -31,6 +32,7 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#one-email-view').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
@@ -43,6 +45,7 @@ function load_mailbox(mailbox) {
         element.innerHTML = `Subject: ${email.subject} <br> From: ${email.sender} <br> Message: ${email.timestamp} <hr>`;
         element.addEventListener('click', function() {
             console.log('This element has been clicked!')
+            each_email(email.id)
         });
         document.querySelector('#emails-view').append(element);
       })
@@ -69,4 +72,28 @@ function send_email(event) {
     load_mailbox('sent')
   })
   .catch((error) => console.log(error));
+}
+
+function each_email(id) {
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#one-email-view').style.display = 'block';
+
+  fetch(`/emails/${id}`)
+  .then(response => response.json())
+  .then(email => {
+      document.querySelector('#sender').value = `${email.sender}`;
+      document.querySelector('#recipients').value = `${email.recipients}`;
+      document.querySelector('h1').innerHTML = `Subject: ${email.subject}`
+      document.querySelector('h5').innerHTML = `Timestamp: ${email.timestamp}`
+      document.querySelector('p').innerHTML = `${email.body}`
+      console.log(email);
+      
+      fetch(`/emails/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            read: true
+        })
+      })
+  });
 }
