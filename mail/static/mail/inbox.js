@@ -52,7 +52,8 @@ function load_mailbox(mailbox) {
         }
         document.querySelector('#emails-view').append(element);
       })
-  });
+  })
+  .catch((error) => console.log(error));
 }
 
 function send_email(event) {
@@ -82,6 +83,27 @@ function each_email(id, mailbox) {
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#one-email-view').style.display = 'block';
 
+  // archive button
+  const archive = document.querySelector('#archive')
+  if (mailbox === 'inbox') {
+    archive.style.display = 'inline';
+    archive.style.float = 'right';
+    archive.innerHTML = 'Archive';
+    archive.addEventListener('click', () => {
+      archive_email(id);
+    });
+  } else if (mailbox === 'archive') { 
+    archive.style.display = 'inline';
+    archive.style.float = 'right';
+    archive.innerHTML = 'Unarchive';
+    archive.addEventListener('click', () => {
+      unarchive_email(id);
+    });
+  } else {
+    archive.style.display = 'none';
+  }
+
+  // get the whole email
   fetch(`/emails/${id}`)
   .then(response => response.json())
   .then(email => {
@@ -91,44 +113,44 @@ function each_email(id, mailbox) {
       document.querySelector('h5').innerHTML = `Timestamp: ${email.timestamp}`
       document.querySelector('p').innerHTML = `${email.body}`
       console.log(email);
-      
+
+      // change read so the bg color changes
       fetch(`/emails/${id}`, {
         method: 'PUT',
         body: JSON.stringify({
             read: true
         })
       })
-  });
-
-  const archive = document.querySelector('#archive')
-  if (mailbox === 'inbox') {
-    archive.style.display = 'inline';
-    archive.style.float = 'right';
-    archive.innerHTML = 'Archive';
-    archive.addEventListener('click', () => {
-      console.log("culo se")
-      fetch(`/emails/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-            archived: true
-        })
-      })    
-      .then(load_mailbox('inbox'));  
-    });
-  } else if (mailbox === 'archive') {
-    archive.style.display = 'inline';
-    archive.style.float = 'right';
-    archive.innerHTML = 'Unarchive';
-    archive.addEventListener('click', () => {
-      fetch(`/emails/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-            archived: false
-        })
-      })
-      .then(load_mailbox('inbox'));  
-    });
-  } else {
-    archive.style.display = 'none';
-  }
+      .catch((error) => console.log(error));
+  })
+  .catch((error) => console.log(error));
 }
+
+function archive_email(id) {
+  fetch(`/emails/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: true
+    })
+  })    
+  .then(setTimeout(function() {
+    load_mailbox('inbox');
+  }, 300))
+  .catch((error) => console.log(error));
+}    
+  
+function unarchive_email(id) {   
+  console.log("zasto tri puta");
+  fetch(`/emails/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: false
+    })
+  })
+  .then(setTimeout(function() {
+    console.log("ovde je problem");
+    load_mailbox('inbox');
+  }, 300))
+  .catch((error) => console.log(error));
+  console.log("zasto tri tri puta");
+};
