@@ -51,9 +51,8 @@ function load_mailbox(mailbox) {
             console.log('This element has been clicked!');
             each_email(email.id);
         });
-        if (email.read == true) {
-          element.style.backgroundColor = 'silver';
-        }
+
+        element.style.backgroundColor = email.read ? 'silver' : 'white';
         document.querySelector('#emails-view').append(element);
       })
   })
@@ -107,6 +106,7 @@ function each_email(id) {
       })
       .catch((error) => console.log(error));
 
+      // archive-unarchive logic (kinda buggy, idk why)
       const archive = document.querySelector('#archive')
       archive.innerHTML = email.archived ? "Unarchive" : "Archive";
       archive.style.display = 'inline';
@@ -122,6 +122,11 @@ function each_email(id) {
         .catch((error) => console.log(error));
       });
 
+      // reply logic
+      document.querySelector('#reply').addEventListener('click', () => {
+        compose_email()
+        // tommorow
+      })
   })
   .catch((error) => console.log(error));
 }
