@@ -104,7 +104,7 @@ function each_email(id, mailbox) {
   if (mailbox === 'inbox') {
     archive.style.display = 'inline';
     archive.style.float = 'right';
-    archive.innerHTML = 'Archive'
+    archive.innerHTML = 'Archive';
     archive.addEventListener('click', () => {
       console.log("culo se")
       fetch(`/emails/${id}`, {
@@ -113,22 +113,21 @@ function each_email(id, mailbox) {
             archived: true
         })
       })    
+      .then(load_mailbox('inbox'));  
     });
-    load_mailbox('inbox');
   } else if (mailbox === 'archive') {
     archive.style.display = 'inline';
     archive.style.float = 'right';
-    archive.value = 'Unarchive'
+    archive.innerHTML = 'Unarchive';
     archive.addEventListener('click', () => {
       fetch(`/emails/${id}`, {
         method: 'PUT',
         body: JSON.stringify({
             archived: false
         })
-      })    
-      
+      })
+      .then(load_mailbox('inbox'));  
     });
-    load_mailbox('inbox');
   } else {
     archive.style.display = 'none';
   }
