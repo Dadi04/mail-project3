@@ -42,10 +42,14 @@ function load_mailbox(mailbox) {
   .then(emails => {
       emails.forEach(email => {
         const element = document.createElement('div');
-        element.innerHTML = `${email.sender} : ${email.subject} <br> ${email.timestamp} <hr>`;
+        if (mailbox === 'sent') {
+          element.innerHTML = `To: ${email.recipients} : ${email.subject} <br> ${email.timestamp} <hr>`;
+        } else {
+          element.innerHTML = `From: ${email.sender} : ${email.subject} <br> ${email.timestamp} <hr>`;
+        }
         element.addEventListener('click', function() {
             console.log('This element has been clicked!');
-            each_email(email.id, mailbox);
+            each_email(email.id);
         });
         if (email.read == true) {
           element.style.backgroundColor = 'silver';
@@ -78,30 +82,10 @@ function send_email(event) {
   .catch((error) => console.log(error));
 }
 
-function each_email(id, mailbox) {
+function each_email(id) {
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#one-email-view').style.display = 'block';
-
-  // archive button
-  const archive = document.querySelector('#archive')
-  if (mailbox === 'inbox') {
-    archive.style.display = 'inline';
-    archive.style.float = 'right';
-    archive.innerHTML = 'Archive';
-    archive.addEventListener('click', () => {
-      archive_email(id);
-    });
-  } else if (mailbox === 'archive') { 
-    archive.style.display = 'inline';
-    archive.style.float = 'right';
-    archive.innerHTML = 'Unarchive';
-    archive.addEventListener('click', () => {
-      unarchive_email(id);
-    });
-  } else {
-    archive.style.display = 'none';
-  }
 
   // get the whole email
   fetch(`/emails/${id}`)
@@ -109,9 +93,9 @@ function each_email(id, mailbox) {
   .then(email => {
       document.querySelector('#sender').value = `${email.sender}`;
       document.querySelector('#recipients').value = `${email.recipients}`;
-      document.querySelector('h1').innerHTML = `Subject: ${email.subject}`
-      document.querySelector('h5').innerHTML = `Timestamp: ${email.timestamp}`
-      document.querySelector('p').innerHTML = `${email.body}`
+      document.querySelector('h1').innerHTML = `Subject: ${email.subject}`;
+      document.querySelector('h5').innerHTML = `Timestamp: ${email.timestamp}`;
+      document.querySelector('p').innerHTML = `${email.body}`;
       console.log(email);
 
       // change read so the bg color changes
@@ -122,35 +106,22 @@ function each_email(id, mailbox) {
         })
       })
       .catch((error) => console.log(error));
+
+      const archive = document.querySelector('#archive')
+      archive.innerHTML = email.archived ? "Unarchive" : "Archive";
+      archive.style.display = 'inline';
+      archive.style.float = 'right';
+      archive.addEventListener('click', () => {
+        fetch(`/emails/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+              archived: !email.archived
+          })
+        })
+        .then(() => { load_mailbox('inbox')})
+        .catch((error) => console.log(error));
+      });
+
   })
   .catch((error) => console.log(error));
 }
-
-function archive_email(id) {
-  fetch(`/emails/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify({
-        archived: true
-    })
-  })    
-  .then(setTimeout(function() {
-    load_mailbox('inbox');
-  }, 300))
-  .catch((error) => console.log(error));
-}    
-  
-function unarchive_email(id) {   
-  console.log("zasto tri puta");
-  fetch(`/emails/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify({
-        archived: false
-    })
-  })
-  .then(setTimeout(function() {
-    console.log("ovde je problem");
-    load_mailbox('inbox');
-  }, 300))
-  .catch((error) => console.log(error));
-  console.log("zasto tri tri puta");
-};
