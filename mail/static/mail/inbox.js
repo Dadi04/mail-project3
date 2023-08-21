@@ -42,17 +42,14 @@ function load_mailbox(mailbox) {
   .then(emails => {
       emails.forEach(email => {
         const element = document.createElement('div');
-        element.innerHTML = `Subject: ${email.subject} <br> From: ${email.sender} <br> Message: ${email.timestamp} <hr>`;
+        element.innerHTML = `${email.sender} : ${email.subject} <br> ${email.timestamp} <hr>`;
         element.addEventListener('click', function() {
-            // fix the color 
-            if (email.read == true) {
-              element.style.backroundColor = "lightgray";
-            } else {
-              element.style.backroundColor = "black";
-            }
-            console.log('This element has been clicked!')
-            each_email(email.id)
+            console.log('This element has been clicked!');
+            each_email(email.id, mailbox);
         });
+        if (email.read == true) {
+          element.style.backgroundColor = 'silver';
+        }
         document.querySelector('#emails-view').append(element);
       })
   });
@@ -80,7 +77,7 @@ function send_email(event) {
   .catch((error) => console.log(error));
 }
 
-function each_email(id) {
+function each_email(id, mailbox) {
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#one-email-view').style.display = 'block';
@@ -102,4 +99,37 @@ function each_email(id) {
         })
       })
   });
+
+  const archive = document.querySelector('#archive')
+  if (mailbox === 'inbox') {
+    archive.style.display = 'inline';
+    archive.style.float = 'right';
+    archive.innerHTML = 'Archive'
+    archive.addEventListener('click', () => {
+      console.log("culo se")
+      fetch(`/emails/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            archived: true
+        })
+      })    
+    });
+    load_mailbox('inbox');
+  } else if (mailbox === 'archive') {
+    archive.style.display = 'inline';
+    archive.style.float = 'right';
+    archive.value = 'Unarchive'
+    archive.addEventListener('click', () => {
+      fetch(`/emails/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            archived: false
+        })
+      })    
+      
+    });
+    load_mailbox('inbox');
+  } else {
+    archive.style.display = 'none';
+  }
 }
