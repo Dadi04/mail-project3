@@ -94,7 +94,7 @@ function each_email(id, mailbox) {
       document.querySelector('#recipients').value = `${email.recipients}`;
       document.querySelector('h1').innerHTML = `Subject: ${email.subject}`;
       document.querySelector('h5').innerHTML = `Timestamp: ${email.timestamp}`;
-      document.querySelector('p').innerHTML = `${email.body}`;
+      document.querySelector('p').innerHTML = email.body.replace(/\n/g, '<br />');
       console.log(email);
 
       // change read so the bg color changes
