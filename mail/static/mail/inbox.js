@@ -107,7 +107,7 @@ function each_email(id) {
       .catch((error) => console.log(error));
 
       // archive-unarchive logic (kinda buggy, idk why)
-      const archive = document.querySelector('#archive')
+      const archive = document.querySelector('#archive');
       archive.innerHTML = email.archived ? "Unarchive" : "Archive";
       archive.style.display = 'inline';
       archive.style.float = 'right';
@@ -124,8 +124,40 @@ function each_email(id) {
 
       // reply logic
       document.querySelector('#reply').addEventListener('click', () => {
-        compose_email()
-        // tommorow
+        document.querySelector('#emails-view').style.display = 'none';
+        document.querySelector('#compose-view').style.display = 'block';
+        document.querySelector('#one-email-view').style.display = 'none';
+      
+        // Pre-fill the input
+        document.querySelector('#compose-recipients').value = email.sender;
+        // fix this and it's done
+        let replied = false; 
+        if (!replied) {
+          document.querySelector('#compose-subject').value = `Re: ${email.subject}`;
+          replied = true;
+        } else {
+          document.querySelector('#compose-subject').value = `${email.subject}`;
+          replied = true;
+        }
+        document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: ${email.body}`;
+
+        document.querySelector('#compose-form').addEventListener('sumbit', () => {
+          fetch('/emails', {
+            method: 'POST',
+            body: JSON.stringify({
+                recipients: email.recipients,
+                subject: document.querySelector('#compose-subject').value,
+                body: document.querySelector('#compose-body').value
+            })
+          })
+          .then(response => response.json())
+          .then(result => {
+              load_mailbox('sent');
+              console.log(result)
+          })
+          .catch((error) => console.log(error));
+        });
+        
       })
   })
   .catch((error) => console.log(error));
