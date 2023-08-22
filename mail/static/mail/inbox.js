@@ -49,7 +49,7 @@ function load_mailbox(mailbox) {
         }
         element.addEventListener('click', function() {
             console.log('This element has been clicked!');
-            each_email(email.id);
+            each_email(email.id, mailbox);
         });
 
         element.style.backgroundColor = email.read ? 'silver' : 'white';
@@ -81,7 +81,7 @@ function send_email(event) {
   .catch((error) => console.log(error));
 }
 
-function each_email(id) {
+function each_email(id, mailbox) {
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#one-email-view').style.display = 'block';
@@ -108,9 +108,13 @@ function each_email(id) {
 
       // archive-unarchive logic (kinda buggy, idk why)
       const archive = document.querySelector('#archive');
-      archive.innerHTML = email.archived ? "Unarchive" : "Archive";
-      archive.style.display = 'inline';
-      archive.style.float = 'right';
+      if (mailbox === 'inbox' || mailbox == 'archive') {
+        archive.innerHTML = email.archived ? "Unarchive" : "Archive";
+        archive.style.display = 'inline';
+        archive.style.float = 'right';
+      } else {
+        archive.style.display = 'none';
+      }
       archive.addEventListener('click', () => {
         fetch(`/emails/${id}`, {
           method: 'PUT',
@@ -130,7 +134,6 @@ function each_email(id) {
       
         // Pre-fill the input
         document.querySelector('#compose-recipients').value = email.sender;
-        // fix this and it's done
         let subject_existing = document.querySelector('#compose-subject')
         if (!subject_existing.value.startsWith('Re: ')) {
           subject_existing.value = `Re: ${email.subject}`;
