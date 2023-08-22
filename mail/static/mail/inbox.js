@@ -131,13 +131,11 @@ function each_email(id) {
         // Pre-fill the input
         document.querySelector('#compose-recipients').value = email.sender;
         // fix this and it's done
-        let replied = false; 
-        if (!replied) {
-          document.querySelector('#compose-subject').value = `Re: ${email.subject}`;
-          replied = true;
+        let subject_existing = document.querySelector('#compose-subject')
+        if (!subject_existing.value.startsWith('Re: ')) {
+          subject_existing.value = `Re: ${email.subject}`;
         } else {
-          document.querySelector('#compose-subject').value = `${email.subject}`;
-          replied = true;
+          subject_existing.value = `${email.subject}`;
         }
         document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote: ${email.body}`;
 
@@ -146,7 +144,7 @@ function each_email(id) {
             method: 'POST',
             body: JSON.stringify({
                 recipients: email.recipients,
-                subject: document.querySelector('#compose-subject').value,
+                subject: subject_existing.value ,
                 body: document.querySelector('#compose-body').value
             })
           })
